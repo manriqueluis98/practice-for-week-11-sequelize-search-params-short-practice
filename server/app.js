@@ -17,7 +17,8 @@ app.use(express.json());
 app.get('/musicians', async (req, res, next) => {
     // Establish base query object to be built up
     let query = {
-        where: {},
+        where: {
+        },
         include: []
     };
 
@@ -39,12 +40,20 @@ app.get('/musicians', async (req, res, next) => {
     // End result: { where: { firstName: req.query.firstName } }
 
     // Your code here
+    const firstName = req.query.firstName
+    if(firstName !== undefined){
+        query.where.firstName = firstName
+    }
+
     
     // Add keys to the WHERE clause to match the lastName param, if it exists.
     // End result: { where: { lastName: req.query.lastName } }
     
     // Your code here
-
+    const lastName = req.query.lastName
+    if(lastName !== undefined){
+        query.where.lastName = lastName
+    }
 
     // STEP 2: WHERE clauses on the associated Band model
     // ?bandName=XX
@@ -53,6 +62,15 @@ app.get('/musicians', async (req, res, next) => {
     // End result: { include: [{ model: Band, where: { name: req.query.bandName } }] }
 
     // Your code here
+    const bandName = req.query.bandName
+    if(bandName !== undefined){
+        query.include.push({
+            model: Band,
+            where: {
+                name: bandName
+            }
+        }) 
+    }
 
 
     // STEP 3: WHERE Clauses on the associated Instrument model 
@@ -71,6 +89,21 @@ app.get('/musicians', async (req, res, next) => {
     */
 
     // Your code here
+    const instrumentTypes = req.query.instrumentTypes
+    console.log(instrumentTypes)
+    if(instrumentTypes !== undefined){
+        if(query.include.length > 0){
+
+        }
+
+        query.include.push({
+            model: Instrument,
+            where: {
+                type: instrumentTypes
+            },
+            through: { attributes: [] }
+        })
+    }
 
 
     // BONUS STEP 4: Specify Musician attributes to be returned
@@ -83,6 +116,17 @@ app.get('/musicians', async (req, res, next) => {
     // If any other attributes are provided, only include those values
 
     // Your code here
+    const musicianFields = req.query.musicianFields
+
+    if(musicianFields !== undefined){
+        if(musicianFields === 'all'){
+
+        }else if(musicianFields === 'none'){
+            query.attributes = []
+        }else{
+            query.attributes = musicianFields
+        }
+    }
 
 
     // BONUS STEP 5: Specify attributes to be returned
@@ -121,7 +165,7 @@ app.get('/musicians', async (req, res, next) => {
 
     // Your code here
 
-
+    console.log(query)
     // Perform compiled query
     const musicians = await Musician.findAndCountAll(query);
 
@@ -137,5 +181,5 @@ app.get('/', (req, res) => {
 });
 
 // Set port and listen for incoming requests - DO NOT MODIFY
-const port = 5000;
+const port = 5500;
 app.listen(port, () => console.log('Server is listening on port', port));
