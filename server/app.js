@@ -90,7 +90,7 @@ app.get('/musicians', async (req, res, next) => {
 
     // Your code here
     const instrumentTypes = req.query.instrumentTypes
-    console.log(instrumentTypes)
+  
     if(instrumentTypes !== undefined){
         if(query.include.length > 0){
 
@@ -119,10 +119,10 @@ app.get('/musicians', async (req, res, next) => {
     const musicianFields = req.query.musicianFields
 
     if(musicianFields !== undefined){
-        if(musicianFields === 'all'){
+        if(musicianFields.includes('all')){
 
-        }else if(musicianFields === 'none'){
-            query.attributes = []
+        }else if(musicianFields.includes('none')){
+            query.attributes = ['id']
         }else{
             query.attributes = musicianFields
         }
@@ -148,6 +148,33 @@ app.get('/musicians', async (req, res, next) => {
             }]
         }
     */
+   const bandFields = req.query.bandFields
+   const instrumentFields = req.query.instrumentFields
+
+   if(bandFields !== undefined){
+        if(bandFields.includes('all')){
+
+        }else if(bandFields.includes('none')){
+            query.include[0].through = {
+                attributes: []
+            }
+
+        }else{
+            query.include[0].attributes = bandFields
+        }
+   }
+
+   if(instrumentFields !== undefined){
+        if(instrumentFields.includes('all')){
+
+        }else if(instrumentFields.includes('none')){
+            query.include[1].through = {
+                attributes: []
+            }
+        }else{
+            query.include[1].attributes = instrumentFields
+        }
+   }
 
 
     // BONUS STEP 6: Order Options
@@ -164,6 +191,22 @@ app.get('/musicians', async (req, res, next) => {
     // End result: { order: [['firstName', 'asc'], ['lastName'], ['createdAt', 'desc']] }
 
     // Your code here
+    const order = req.query.order // Array with orders , inside each one
+
+    let orders
+
+    if(order !== undefined){
+        orders = order.map((val) => {
+            const props = val.split(',')
+            const col = props[0]
+            const order = props[1]
+            return [col, order]
+        })
+    }
+
+    if(orders !== undefined){
+        query.order = orders
+    }
 
     console.log(query)
     // Perform compiled query
